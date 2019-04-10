@@ -7,6 +7,7 @@
   // seem very useful, but remember it--if a function needs to provide an
   // iterator when the user does not pass one in, this will be handy.
   _.identity = function(val) {
+    return val;
   };
 
   /**
@@ -37,6 +38,7 @@
   // Like first, but for the last elements. If n is undefined, return just the
   // last element.
   _.last = function(array, n) {
+    return n === undefined ? array.slice(-1)[0] : n===0 ? [] : array.slice(-n);
   };
 
   // Call iterator(value, key, collection) for each element of collection.
@@ -45,6 +47,17 @@
   // Note: _.each does not have a return value, but rather simply runs the
   // iterator function over each item in the input collection.
   _.each = function(collection, iterator) {
+    if (Array.isArray(collection)){
+      let l = collection.length;
+      for (let i =0; i<l; i++){
+        iterator(collection[i], i, collection);
+      }
+    }else if (typeof collection === 'object'){
+      for (let i in collection){
+        iterator(collection[i], i, collection);
+      }
+    }
+
   };
 
   // Returns the index at which value can be found in the array, or -1 if value
@@ -66,24 +79,94 @@
 
   // Return all elements of an array that pass a truth test.
   _.filter = function(collection, test) {
+    var ans = [];
+
+    _.each(collection, (el, i) => {
+      if (test(el, i)) {
+        ans.push(el);
+      }
+    });
+
+    return ans;
   };
 
   // Return all elements of an array that don't pass a truth test.
   _.reject = function(collection, test) {
     // TIP: see if you can re-use _.filter() here, without simply
     // copying code in and modifying it
+
+    // var invTest = function(el, i) {
+    //   if (test(el, i)) {
+    //     return false;
+    //   } else return true;
+    // };
+
+    return _.filter(collection, (el, i) => !test(el, i));
   };
 
   // Produce a duplicate-free version of the array.
   _.uniq = function(array, isSorted, iterator) {
+    // if the iterator is undefined >> iterator = identity
+
+
+
+    //unsorted
+    //for each value
+      //if ans doesnt contain array, push into ans
+    
+    //sorted
+    //for each value
+      //push first element into answer
+      //if index is 0, push first element
+      //else if current element not equal to past element, then push it into ans
+
+      var ans = [];
+      var ansT =[];
+      if (iterator==undefined){
+        iterator = _.identity;
+      }
+
+      // debugger;
+      var arrT=[]; 
+      _.each(array, i=> arrT.push(iterator(i)) ); // arrT= [T, F, F, T]
+      
+      // debugger;
+
+      
+      if (!isSorted) {
+        _.each(array, (elem, i, a) => {
+          if (!ansT.includes(arrT[i])) {
+            ansT.push(arrT[i]);
+            ans.push(a[i]);
+          }
+        });
+      } else {
+        _.each(array, (elem, i, a) => {
+          if (i === 0) {
+            ansT.push(arrT[i]);
+            ans.push(a[i])
+          } else {
+            if (arrT[i] !== arrT[i-1]) {
+              ansT.push(arrT[i]);
+              ans.push(a[i]);
+            }
+          }
+        });
+      }
+
+       return ans;
   };
 
 
   // Return the results of applying an iterator to each element.
   _.map = function(collection, iterator) {
-    // map() is a useful primitive iteration function that works a lot
-    // like each(), but in addition to running the operation on all
-    // the members, it also maintains an array of results.
+    var ans =[]; 
+    _.each(collection, function(value, index, arr){
+      ans.push(iterator(value, index, arr))
+
+    })
+    return ans
+
   };
 
   /*
@@ -124,7 +207,23 @@
   //     return total + number * number;
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
-  _.reduce = function(collection, iterator, accumulator) {
+  _.reduce = function(collection, iterator, acc_input) {
+    //  if accinput is undefined, set accumulator = collection[0]
+    //  else, set accumulator = accinput 
+    var accumulator = acc_input===undefined ? collection[0]: acc_input;
+    // [1,9,5,6]
+      
+
+    // go through each values in the array 
+    _.each(collection, function(element, index, arr){
+      if (index !==0 || acc_input!==undefined){
+        accumulator = iterator(accumulator, element);
+      }
+    });
+        // if current index >0, then we do sth 
+          // working the iterator function; iterator(accumulator, current item)
+        // working the iterator function; iterator(accumulator, current item)
+    return accumulator;
   };
 
   // Determine if the array or object contains a given value (using `===`).
@@ -142,7 +241,7 @@
 
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
-    // TIP: Try re-using reduce() here.
+    
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
